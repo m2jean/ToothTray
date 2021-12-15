@@ -2,6 +2,8 @@
 
 A tray icon in Windows task bar to quickly connect or disconnect bluetooth audio devices.
 
+Right click the icon to see a list of paired bluetooth audio devices. Select a device to connect/disconnect them depending on their current connection state.
+
 ## Problem
 
 Windows provides 2 ways to connect or disconnect bluetooth audio devices. One is using the "Connect" side pannel that can either be opened by pressing `Win + K` or from action center. Another requires opening the "Bluetooth and other devices" setting page. Both ways requires multiple clicks or key presses.
@@ -24,7 +26,7 @@ And it turns out the the KS component we are looking for is always a KS filter d
 
 ### Group and Identify Bluetooth Audio Endpoints
 
-Sometimes a bluetooth audio device support multiple bluetooth profiles, and it can appears in Windows as multiple different audio endpoints. When Windows connects to a bluetooth audio device, it connects all associated audio endpoints so that they can be switched on demand. And only when all associated audio endpoints are disconnected can a bluetooth audio be completed disconnected from Windows.
+Sometimes a bluetooth audio device supports multiple bluetooth profiles, and it can appears in Windows as multiple different audio endpoints. When Windows connects to a bluetooth audio device, it connects all associated audio endpoints so that they can be switched on demand. And only when all associated audio endpoints are disconnected can a bluetooth audio be completed disconnected from Windows.
 
 In Windows, devices and services are grouped by device containers that represent the actual physical devices. We can group the audio endpoints using their `PKEY_Device_ContainerId` property such that endpoints with the same container id are grouped together. I used WinRT `DeviceInformation::FindAllAsync` to enumerate all existing device containers and their properties. By joining them together, we get a unified representation of a connectable bluetooth audio device, with a name for the physical device (from the container) and multiple associated connection controls.
 
