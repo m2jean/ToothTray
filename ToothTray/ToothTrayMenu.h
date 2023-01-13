@@ -29,5 +29,5 @@ private:
     wil::unique_hmenu m_handle;
     std::unordered_map<unsigned int, MenuData> m_menuData;
 
-    MENUITEMINFOW InsertBluetoohConnectorMenuItem(UINT id, UINT position, LPWSTR pText);
+    MENUITEMINFOW InsertBluetoohConnectorMenuItem(UINT id, UINT position, LPWSTR pText, bool checked);
 };
