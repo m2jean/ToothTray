@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include <windowsx.h>
 
+#include "debuglog.h"
+
 void ToothTrayMenu::BuildMenu(std::vector<BluetoothConnector>& connectors) {
     m_handle.reset(CreatePopupMenu());
     m_menuData.clear();
@@ -13,10 +15,16 @@ void ToothTrayMenu::BuildMenu(std::vector<BluetoothConnector>& connectors) {
         std::pair<std::unordered_map<unsigned int, MenuData>::iterator, bool> pair =
             m_menuData.emplace(std::piecewise_construct, std::forward_as_tuple(currentMenuItemId), std::forward_as_tuple(currentMenuItemId, std::move(*ite)));
 
-        InsertBluetoohConnectorMenuItem(currentMenuItemId, menuPosition, (*(pair.first)).second.menuText.data());
+        LPWSTR deviceName = (*(pair.first)).second.menuText.data();
+
+        bool checked = (*(pair.first)).second.pConnector.IsConnected();
+
+        DebugLogl(DebugLogStream{} << L"Showing device: " << deviceName << L", connected: " << checked);
+
+        InsertBluetoohConnectorMenuItem(currentMenuItemId, menuPosition, deviceName, checked);
     }
 
-    InsertBluetoohConnectorMenuItem(IDM_EXIT, menuPosition, (WCHAR*)L"Exit");
+    InsertBluetoohConnectorMenuItem(IDM_EXIT, menuPosition, (WCHAR*)L"Exit", false);
 }
 
 void ToothTrayMenu::ShowPopupMenu(HWND hwnd, WPARAM mousPosWParam) {
@@ -46,13 +54,14 @@ bool ToothTrayMenu::TryHandleCommand(int commandId) {
     return true;
 }
 
-MENUITEMINFOW ToothTrayMenu::InsertBluetoohConnectorMenuItem(UINT id, UINT position, LPWSTR pText) {
+MENUITEMINFOW ToothTrayMenu::InsertBluetoohConnectorMenuItem(UINT id, UINT position, LPWSTR pText, bool checked) {
     MENUITEMINFOW menuItem{ sizeof(MENUITEMINFOW) };
-    menuItem.fMask = MIIM_ID | MIIM_STRING;
+    menuItem.fMask = MIIM_ID | MIIM_STRING | MIIM_STATE;
     menuItem.fType = MFT_STRING;
     menuItem.fState = MFS_ENABLED;
     menuItem.wID = id;
     menuItem.dwTypeData = pText;
+    menuItem.fState = checked ? MFS_CHECKED : MFS_UNCHECKED;
     InsertMenuItemW(m_handle.get(), position, TRUE, &menuItem);
 
     return menuItem;
