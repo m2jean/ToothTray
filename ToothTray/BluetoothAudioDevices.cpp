@@ -130,7 +130,7 @@ std::vector<BluetoothConnector> BluetoothAudioDeviceEnumerator::EnumerateAudioDe
 
 void BluetoothConnector::addConnectorControl(const wil::com_ptr<IKsControl>& connectorControl, DWORD state) {
     m_ksControls.emplace_back(connectorControl);
-    m_isConnected &= state == DEVICE_STATE_ACTIVE;
+    m_isConnected |= state == DEVICE_STATE_ACTIVE;
 }
 
 void BluetoothConnector::GetKsBtAudioProperty(ULONG property) {
