@@ -12,13 +12,13 @@ public:
 		Uninitialize();
 	}
 
-	void Initialize(const HWND hWnd, HICON icon, UINT iconId, const WCHAR* windowMessage, HMENU hContextMenu) {
+	void Initialize(const HWND hWnd, HICON icon, UINT iconId, UINT windowMessage, HMENU hContextMenu) {
 		if (m_added)
 			return;
 
 		m_hWnd = hWnd;
 		m_iconId = iconId;
-		m_iconMsg = RegisterWindowMessage(windowMessage);
+		m_iconMsg = windowMessage;
 		m_menu = hContextMenu;
 
 		NOTIFYICONDATA notifyIconData = {};

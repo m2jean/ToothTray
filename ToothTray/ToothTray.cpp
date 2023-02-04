@@ -17,6 +17,7 @@
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+constexpr UINT WM_TRAYICON = WM_APP;
 
 BluetoothAudioDeviceEnumerator bluetoothAudioDeviceEmumerator;
 ToothTrayMenu trayMenu;
@@ -116,7 +117,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    //watcher->Start();
 
    HICON hIcon = (HICON)LoadImageW(hInstance, MAKEINTRESOURCE(IDI_TOOTHTRAY), IMAGE_ICON, 0, 0, LR_DEFAULTSIZE);
-   trayIcon.Initialize(hWnd, hIcon, 0, L"ToothTray::Icon[0]", NULL);
+   trayIcon.Initialize(hWnd, hIcon, 0, WM_TRAYICON, NULL);
 
    //ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
