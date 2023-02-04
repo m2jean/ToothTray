@@ -1,6 +1,7 @@
 #pragma once
 
 #include "framework.h"
+#include <sstream>
 
 inline void DebugLog(PCWCHAR str) {
     OutputDebugStringW(str);

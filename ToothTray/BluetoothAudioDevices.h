@@ -1,5 +1,9 @@
 #pragma once
+#include <vector>
+#include <string>
+
 #include <combaseapi.h>
+#include <wil/com.h>
 #include <wil/resource.h>
 #include <devicetopology.h>
 #include <mmdeviceapi.h>
@@ -12,13 +16,13 @@ public:
     BluetoothConnector& operator=(BluetoothConnector&&) = default;
 
     BluetoothConnector(const std::wstring& containerName)
-        : m_deviceName(containerName), m_isConnected(true) {}
+        : m_deviceName(containerName), m_isConnected(false) {}
 
     std::wstring_view DeviceName() const {
         return std::wstring_view(m_deviceName);
     }
 
-    void addConnectorControl(const winrt::com_ptr<IKsControl>& connectorControl, DWORD state);
+    void addConnectorControl(const wil::com_ptr<IKsControl>& connectorControl, DWORD state);
 
     bool IsConnected() {
         return m_isConnected;
@@ -34,7 +38,7 @@ public:
 private:
     std::wstring m_deviceName;
     bool m_isConnected;
-    std::vector<winrt::com_ptr<IKsControl>> m_ksControls;
+    std::vector<wil::com_ptr<IKsControl>> m_ksControls;
 
     void GetKsBtAudioProperty(ULONG property);
 };

@@ -1,5 +1,7 @@
 #include "debuglog.h"
 
+#include <iomanip>
+
 void DebugLogHresult(HRESULT hr) {
     switch (hr) {
     case S_OK:

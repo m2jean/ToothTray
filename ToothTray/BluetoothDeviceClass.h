@@ -1,6 +1,7 @@
 #pragma once
 
 #include "framework.h"
+#include <iostream>
 #include <BluetoothAPIs.h>
 
 struct BluetoothDeviceClass {

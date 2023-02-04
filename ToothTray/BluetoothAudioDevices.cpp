@@ -31,11 +31,11 @@ std::vector<BluetoothConnector> BluetoothAudioDeviceEnumerator::EnumerateAudioDe
     std::unordered_map<GUID, BluetoothConnector, GUIDHasher, GUIDEqualityComparer> bluetoothConnectors;
     std::unordered_map<GUID, std::wstring, GUIDHasher, GUIDEqualityComparer> containers = DeviceContainerEnumerator::EnumerateContainers();
 
-    winrt::com_ptr<IMMDeviceEnumerator> pEnumerator;
+    wil::com_ptr<IMMDeviceEnumerator> pEnumerator;
     HRESULT hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), pEnumerator.put_void());
     DebugLogHresult(hr);
 
-    winrt::com_ptr <IMMDeviceCollection> pDevices;
+    wil::com_ptr <IMMDeviceCollection> pDevices;
     hr = pEnumerator->EnumAudioEndpoints(eRender, DEVICE_STATEMASK_ALL, pDevices.put());
     DebugLogHresult(hr);
 
@@ -43,7 +43,7 @@ std::vector<BluetoothConnector> BluetoothAudioDeviceEnumerator::EnumerateAudioDe
     hr = pDevices->GetCount(&deviceCount);
 
     for (UINT i = 0; i < deviceCount; ++i) {
-        winrt::com_ptr<IMMDevice> pDevice;
+        wil::com_ptr<IMMDevice> pDevice;
         pDevices->Item(i, pDevice.put());
 
         // No need to get IMMEndpoint because we already know it's a render device
@@ -71,29 +71,29 @@ std::vector<BluetoothConnector> BluetoothAudioDeviceEnumerator::EnumerateAudioDe
         }
 
 
-        winrt::com_ptr<IPropertyStore> pPropertyStore;
+        wil::com_ptr<IPropertyStore> pPropertyStore;
         pDevice->OpenPropertyStore(STGM_READ, pPropertyStore.put());
         std::wstring deviceName = GetDeviceName(*pPropertyStore.get());
         GUID containerId = GetContainerId(*pPropertyStore.get());
 
         DebugLogl(DebugLogStream{} << L"device name: " << deviceName << L", state: " << stateStr << ", id: " << pDeviceId.get() << ", container: " << containerId);
 
-        winrt::com_ptr<IDeviceTopology> pTopology;
+        wil::com_ptr<IDeviceTopology> pTopology;
         pDevice->Activate(__uuidof(IDeviceTopology), CLSCTX_ALL, NULL, pTopology.put_void());
 
         UINT connectorCount;
         pTopology->GetConnectorCount(&connectorCount);
         for (UINT i = 0; i < connectorCount; ++i) {
-            winrt::com_ptr<IConnector> pConnector;
+            wil::com_ptr<IConnector> pConnector;
             pTopology->GetConnector(i, pConnector.put());
 
-            winrt::com_ptr<IConnector> pOtherConnector;
+            wil::com_ptr<IConnector> pOtherConnector;
             pConnector->GetConnectedTo(pOtherConnector.put());
             if (pOtherConnector == nullptr)
                 continue;
 
-            winrt::com_ptr<IPart> pPart{ pOtherConnector.as<IPart>() };
-            winrt::com_ptr<IDeviceTopology> pOtherTopology;
+            wil::com_ptr<IPart> pPart{ pOtherConnector.query<IPart>() };
+            wil::com_ptr<IDeviceTopology> pOtherTopology;
             pPart->GetTopologyObject(pOtherTopology.put());
             wil::unique_cotaskmem_string otherDeviceId;
             pOtherTopology->GetDeviceId(otherDeviceId.put());
@@ -103,10 +103,10 @@ std::vector<BluetoothConnector> BluetoothAudioDeviceEnumerator::EnumerateAudioDe
             if (!std::wstring_view(otherDeviceId.get()).starts_with(LR""({2}.\\?\bth)"")) // bthenum or bthhfenum
                 continue;
 
-            winrt::com_ptr<IMMDevice> pOtherDevice;
+            wil::com_ptr<IMMDevice> pOtherDevice;
             pEnumerator->GetDevice(otherDeviceId.get(), pOtherDevice.put());
 
-            winrt::com_ptr<IKsControl> pKsControl;
+            wil::com_ptr<IKsControl> pKsControl;
             pOtherDevice->Activate(__uuidof(IKsControl), CLSCTX_ALL, NULL, pKsControl.put_void());
 
             std::unordered_map<GUID, BluetoothConnector, GUIDHasher, GUIDEqualityComparer>::iterator ite = bluetoothConnectors.find(containerId);
@@ -128,7 +128,7 @@ std::vector<BluetoothConnector> BluetoothAudioDeviceEnumerator::EnumerateAudioDe
     return connectors;
 }
 
-void BluetoothConnector::addConnectorControl(const winrt::com_ptr<IKsControl>& connectorControl, DWORD state) {
+void BluetoothConnector::addConnectorControl(const wil::com_ptr<IKsControl>& connectorControl, DWORD state) {
     m_ksControls.emplace_back(connectorControl);
     m_isConnected &= state == DEVICE_STATE_ACTIVE;
 }
@@ -140,7 +140,7 @@ void BluetoothConnector::GetKsBtAudioProperty(ULONG property) {
     ksProperty.Flags = KSPROPERTY_TYPE_GET;
 
     ULONG bytesReturned;
-    for (winrt::com_ptr<IKsControl> &ksControl : m_ksControls) {
+    for (wil::com_ptr<IKsControl> &ksControl : m_ksControls) {
         HRESULT hr = ksControl->KsProperty(&ksProperty, sizeof(ksProperty), NULL, 0, &bytesReturned);
         DebugLogHresult(hr);
     }

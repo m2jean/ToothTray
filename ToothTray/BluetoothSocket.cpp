@@ -82,6 +82,8 @@ int EnumerateBluetoothDevicesAndServices() {
     if (foundCh510) {
         EnumerateBluetoothServices(ch510Addr);
     }
+
+    return S_OK;
 }
 
 INT LookupService::LookupNext(DWORD dwControlFlags) {
