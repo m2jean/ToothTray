@@ -1,5 +1,6 @@
 #include "DeviceContainerEnumerator.h"
 
+#include <winrt\Windows.Foundation.Collections.h>
 #include <combaseapi.h>
 
 static GUID from_id(winrt::hstring id) {
